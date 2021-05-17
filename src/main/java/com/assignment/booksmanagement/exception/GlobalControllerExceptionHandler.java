@@ -20,21 +20,26 @@ public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHan
 
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity handleResourceNotFoundException(ResourceNotFoundException exception, Throwable throwable) {
+    public ResponseEntity handleResourceNotFoundException(ResourceNotFoundException exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseMessage(exception.getMessage()));
     }
 
     @ExceptionHandler(ResourceAlreadyExistException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity handleResourceAlreadyExistException(ResourceAlreadyExistException exception,
-                    Throwable throwable) {
+    public ResponseEntity handleResourceAlreadyExistException(ResourceAlreadyExistException exception) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(new ResponseMessage(exception.getMessage()));
     }
 
     @ExceptionHandler(RequestNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity handleRequestNotValidException(RequestNotValidException exception, Throwable throwable) {
+    public ResponseEntity handleRequestNotValidException(RequestNotValidException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseMessage(exception.getMessage()));
+    }
+
+    @ExceptionHandler(DefaultRuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity handleDefaultRuntimeException(RequestNotValidException exception) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseMessage(exception.getMessage()));
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
@@ -12,20 +13,20 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class BookTag {
+public class BookTag implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
     @JsonIgnore
     private Long id;
-    @Column(name = "TAG", nullable = false)
+    @Column(name = "TAG")
     private String tag;
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne//(cascade = CascadeType.ALL)
     @JsonIgnore
-    @JoinColumn(name = "BookTagID")
+    @JoinColumn(name = "isbn", referencedColumnName = "isbn")
     Book book;
 
-    @Override public boolean equals(Object o) {
+  @Override public boolean equals(Object o) {
         if (this == o)
             return true;
         if (o == null || getClass() != o.getClass())

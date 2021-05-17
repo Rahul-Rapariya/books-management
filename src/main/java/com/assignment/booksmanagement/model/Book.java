@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.*;
 
 @Entity
@@ -15,25 +16,25 @@ import java.util.*;
 @AllArgsConstructor
 @Builder
 //@EqualsAndHashCode(of = "isbn")
-public class Book {
+public class Book implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Column(name = "ID")
     private Long id;
-    @Column(name = "ISBN", unique = true, nullable = false)
+    @Column(name = "ISBN")
     private Long isbn;
-    @Column(name = "TITLE",nullable = false)
+    @Column(name = "TITLE")
     private String title;
-    @Column(name = "AUTHOR", nullable = false)
+    @Column(name = "AUTHOR")
     private String author;
     @OneToMany(mappedBy = "book",
-                    cascade = CascadeType.ALL,
-                    orphanRemoval = true
+                    cascade = CascadeType.ALL
+                    ,orphanRemoval = true
     )
     private Set<BookTag> tags;
     @CreationTimestamp
-    @Column(name = "CreatedAt", nullable = false)
+    @Column(name = "CreatedAt")
     private Date createdAt;
     @Column(name = "LastUpdatedAt")
     private Date updatedAt;
@@ -47,27 +48,41 @@ public class Book {
     }
 
     public void addBookTags(Set<BookTag> bookTags) {
-        if (!(null == bookTags) && (!bookTags.isEmpty())) {
-            if (tags == null) {
-                tags = new HashSet<>();
-            }
-            for (BookTag bookTag : bookTags) {
-                tags.add(bookTag);
-                bookTag.setBook(this);
-            }
+        if (null == bookTags) {
+            return;
+        }
+        if (tags == null) {
+            tags = new HashSet<>();
+        }
+        for (BookTag bookTag : bookTags) {
+            tags.add(bookTag);
+            bookTag.setBook(this);
         }
     }
 
+    public void updateBookTags(Set<BookTag> bookTags) {
+        if (null == bookTags) {
+            return;
+        }
+        if (tags == null) {
+            tags = new HashSet<>();
+        }
+        tags.clear();
+        for (BookTag bookTag : bookTags) {
+            tags.add(bookTag);
+            bookTag.setBook(this);
+        }
+    }
     public void removeBookTag(BookTag bookTag) {
         tags.remove(bookTag);
         bookTag.setBook(null);
     }
 
     public void removeBooksTags(Set<BookTag> bookTags) {
-        for (BookTag bookTag : bookTags) {
-            tags.remove(bookTag);
-            bookTag.setBook(null);
-        }
+        Iterator iterator = bookTags.iterator();
+        tags.removeAll(bookTags);
+        bookTags.stream().forEach(tag->tag.setBook(null));
+
     }
 
     public Book(long isbn, String title, String author) {
@@ -85,7 +100,6 @@ public class Book {
             bookTag.setTag(tag.trim());
             bookTags.add(bookTag);
         }
-
         this.tags = bookTags;
         this.addBookTags(bookTags);
     }

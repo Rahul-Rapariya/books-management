@@ -3,7 +3,9 @@ package com.assignment.booksmanagement.service;
 import com.assignment.booksmanagement.exception.ResourceAlreadyExistException;
 import com.assignment.booksmanagement.exception.ResourceNotFoundException;
 import com.assignment.booksmanagement.model.Book;
+import com.assignment.booksmanagement.model.BookTag;
 import com.assignment.booksmanagement.repository.BookRepository;
+import com.assignment.booksmanagement.repository.BookTagRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,21 +13,23 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
-@Transactional
 public class BookServiceImpl implements BookService {
     private static final Logger logger = LoggerFactory.getLogger(BookServiceImpl.class);
 
     @Autowired BookRepository bookRepository;
+    @Autowired BookTagRepository bookTagRepository;
 
     @Override
     public Book addBook(Book book) {
         Optional<Book> bookDb = bookRepository.findByisbn(book.getIsbn());
         if (bookDb.isPresent()) {
             logger.error("Book already exist with ISBN {}", book.getIsbn());
-            throw new ResourceAlreadyExistException("Book already exist with ISBN {}" + book.getIsbn());
+            throw new ResourceAlreadyExistException("Book already exist with ISBN : " + book.getIsbn());
         } else {
             Book bookToAdd = Book.builder().isbn(book.getIsbn())
                             .author(book.getAuthor())
@@ -57,15 +61,14 @@ public class BookServiceImpl implements BookService {
             bookUpdate.setAuthor(book.getAuthor());
             bookUpdate.setTitle(book.getTitle());
             bookUpdate.setIsbn(book.getIsbn());
-            bookUpdate.getTags().clear();
-            bookUpdate.addBookTags(book.getTags());
+            bookUpdate.updateBookTags(book.getTags());
             bookUpdate.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
-            bookRepository.save(bookUpdate);
+            Book savedBook = bookRepository.save(bookUpdate);
             logger.info("Book with ISBN {} updated successfully", isbn);
-            return bookUpdate;
+            return savedBook;
         } else {
-            logger.error("Book not found with ISBN {}", book.getIsbn());
-            throw new ResourceNotFoundException("Book not found with ISBN : " + book.getIsbn());
+            logger.error("Book not found with ISBN {}", isbn);
+            throw new ResourceNotFoundException("Book not found with ISBN : " + isbn);
         }
     }
 

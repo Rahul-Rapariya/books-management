@@ -13,7 +13,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
 @EnableSwagger2
-@ComponentScan("com.*")
 public class BooksManagementApplication {
 
     public static void main(String[] args) {
@@ -32,7 +31,7 @@ public class BooksManagementApplication {
 
     private ApiInfo generateApiInfo() {
         return new ApiInfo("Book management Service",
-                        "This service is to manage book i.e. you can peform CRUD operation using ISBN, import books vis CSV and search them as well",
+                        "This service is to manage book i.e. you can perform CRUD operation using ISBN, import books via CSV and search them as well",
                         "Version 1.0 ",
                         "abc.com", "rahulrapariya@gmail.com", "Apache 2.0",
                         "http://www.apache.org/licenses/LICENSE-2.0");
