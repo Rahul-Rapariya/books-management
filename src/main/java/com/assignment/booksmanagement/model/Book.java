@@ -1,6 +1,8 @@
 package com.assignment.booksmanagement.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -10,18 +12,17 @@ import java.util.*;
 
 @Entity
 @Table(name = "Books")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-//@EqualsAndHashCode(of = "isbn")
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+@Builder @EqualsAndHashCode(of="isbn")
+@ApiModel("Book with attributes ISBN,TITLE, AUTHOR")
 public class Book implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Column(name = "ID")
     private Long id;
+    @ApiModelProperty("Unique Identifier of Book")
     @Column(name = "ISBN")
     private Long isbn;
     @Column(name = "TITLE")
@@ -29,8 +30,8 @@ public class Book implements Serializable {
     @Column(name = "AUTHOR")
     private String author;
     @OneToMany(mappedBy = "book",
-                    cascade = CascadeType.ALL
-                    ,orphanRemoval = true
+               cascade = CascadeType.ALL
+              ,orphanRemoval = true
     )
     private Set<BookTag> tags;
     @CreationTimestamp
@@ -48,9 +49,6 @@ public class Book implements Serializable {
     }
 
     public void addBookTags(Set<BookTag> bookTags) {
-        if (null == bookTags) {
-            return;
-        }
         if (tags == null) {
             tags = new HashSet<>();
         }
@@ -61,18 +59,17 @@ public class Book implements Serializable {
     }
 
     public void updateBookTags(Set<BookTag> bookTags) {
-        if (null == bookTags) {
-            return;
-        }
         if (tags == null) {
             tags = new HashSet<>();
         }
-        tags.clear();
+            tags.clear();
+
         for (BookTag bookTag : bookTags) {
             tags.add(bookTag);
             bookTag.setBook(this);
         }
     }
+
     public void removeBookTag(BookTag bookTag) {
         tags.remove(bookTag);
         bookTag.setBook(null);
@@ -102,18 +99,5 @@ public class Book implements Serializable {
         }
         this.tags = bookTags;
         this.addBookTags(bookTags);
-    }
-
-    @Override public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-        Book book1 = (Book) o;
-        return isbn == book1.isbn;
-    }
-
-    @Override public int hashCode() {
-        return Objects.hash(isbn);
     }
 }

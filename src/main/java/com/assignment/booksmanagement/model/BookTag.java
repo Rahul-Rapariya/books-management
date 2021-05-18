@@ -10,9 +10,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "BooksTags")
 @Getter @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
+@NoArgsConstructor @AllArgsConstructor
 public class BookTag implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
