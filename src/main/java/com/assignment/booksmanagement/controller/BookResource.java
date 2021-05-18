@@ -11,6 +11,8 @@ import com.assignment.booksmanagement.utility.CsvParserUtility;
 
 import com.assignment.booksmanagement.service.SearchBooksService;
 import com.assignment.booksmanagement.service.UploadBooksService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import net.kaczmarzyk.spring.data.jpa.domain.Equal;
 import net.kaczmarzyk.spring.data.jpa.domain.Like;
 import net.kaczmarzyk.spring.data.jpa.web.annotation.And;
@@ -44,20 +46,34 @@ public class BookResource {
     SearchBooksService searchBooksService;
 
     @GetMapping("/book/{isbn}")
-    public ResponseEntity getBook(@PathVariable long isbn) {
+    @ApiOperation(value = "Return book for given ISBN",
+                    notes = "Book with all the attributes will be return for give ISBN",
+                    response = Book.class)
+    public ResponseEntity getBook(
+                    @ApiParam(value = "Unique ISBN value of the book", required = true)
+                    @PathVariable long isbn) {
         logger.info("Request received to get book having ISBN : {}", isbn);
         return ResponseEntity.ok().body(bookService.getBook(isbn));
     }
 
     @PostMapping("/book")
+    @ApiOperation(value = "Add new given book to the database",
+                    notes = "Please only provide ISBN, Author, Title and List of tag of book in the request body. All 4 fields are mandatory",
+                    response = Book.class)
     public ResponseEntity addBook(@RequestBody Book book) {
         validateBook(book);
         logger.info("Request received to add book with ISBN : {}", book.getIsbn());
+        logger.info("Request received to add book with ISBN : {}", book.getTags().toArray());
         return ResponseEntity.ok().body(bookService.addBook(book));
     }
 
     @PutMapping("/book/{isbn}")
-    public ResponseEntity updateBook(@PathVariable long isbn, @RequestBody Book book) {
+    @ApiOperation(value = "Update the book in database with new given book attributes for given ISBN",
+                    notes = "Please only provide ISBN, Author, Title and List of tag of book in the request body. All 4 fields are mandatory",
+                    response = Book.class)
+    public ResponseEntity updateBook(
+                    @ApiParam(value = "Unique ISBN value of the book", required = true)
+                    @PathVariable long isbn, @RequestBody Book book) {
         validateBook(book);
         logger.info("Request received to update book with ISBN : {}", isbn);
         Book updatedBook = bookService.updateBook(isbn, book);
@@ -65,7 +81,10 @@ public class BookResource {
     }
 
     @DeleteMapping("/book/{isbn}")
-    public ResponseEntity deleteBook(@PathVariable long isbn) {
+    @ApiOperation(value = "Delete the book in database for given ISBN")
+    public ResponseEntity deleteBook(
+                    @ApiParam(value = "Unique ISBN value of the book", required = true)
+                    @PathVariable long isbn) {
         logger.info("Request received to delete book with ISBN : {} ", isbn);
         bookService.deleteBook(isbn);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage("deleted successfully"));
@@ -73,7 +92,14 @@ public class BookResource {
     }
 
     @PostMapping("/upload-books")
+    @ApiOperation(value = "Add the books of given CSV file",
+                    notes = "Please upload the comma separated CSV file. Use '|' for adding multiple tags. "
+                                    + "Sample records with Header:\n "
+                                    + "ISBN,TITLE,AUTHOR,TAGS\n"
+                                    + "121,Book1,Author1,inspire1|inspire11\n"
+                                    + "122,Book2,Author2,inspire2")
     public ResponseEntity uploadBooks(@RequestParam("file") MultipartFile file) {
+        logger.info("Request received to upload books of file {}", file.getName());
         String message = "";
         if (CsvParserUtility.hasCSVFormat(file)) {
             try {
@@ -96,11 +122,15 @@ public class BookResource {
                     @Spec(path = "isbn", params = "isbn", spec = Equal.class)
     })
     interface BookSpec extends Specification<Book> {
-
     }
 
     @GetMapping("/search-books")
-    public ResponseEntity<List<Book>> searchBooks(BookSpec bookSpec, Sort sort, @RequestHeader HttpHeaders headers) {
+    @ApiOperation(value = "Search the book with one of given attributes among ISBN, tag, author and title",
+                    notes = "You can search the books using one of above mentioned parameter. Sample request: "
+                                    + "http://localhost:8080/books-management/v1/search-books?tag={tag_value}")
+    public ResponseEntity<List<Book>> searchBooks(
+                    @ApiParam(value = "Unique search value of the book", required = false)
+                                    BookSpec bookSpec, Sort sort, @RequestHeader HttpHeaders headers) {
         final PagingResponse response = searchBooksService.searchBook(bookSpec, headers, sort);
         return new ResponseEntity<>(response.getElements(), returnHttpHeaders(response), HttpStatus.OK);
     }
@@ -114,7 +144,6 @@ public class BookResource {
         headers.set(PagingHeaders.PAGE_TOTAL.getName(), String.valueOf(response.getPageTotal()));
         return headers;
     }
-
 }
 
 

@@ -1,5 +1,6 @@
 package com.assignment.booksmanagement.utility;
 
+import com.assignment.booksmanagement.exception.DefaultRuntimeException;
 import com.assignment.booksmanagement.model.Book;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -16,7 +17,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-@Component
 public class CsvParserUtility {
     public static final String TYPE = "text/csv";
     static String[] headers = { "ISBN", "TITLE", "AUTHOR", "TAGS" };
@@ -44,10 +44,10 @@ public class CsvParserUtility {
                             .collect(Collectors.toList());
 
         } catch (IOException ioException) {
-            throw new RuntimeException("fail to parse CSV file:" + ioException.getMessage());
+            throw new DefaultRuntimeException("IOException:fail to parse CSV file:" + ioException.getMessage());
         }
-        catch (Exception ioException) {
-            throw new RuntimeException("fail to parse CSV file:" + ioException.getMessage());
+        catch (Exception exception) {
+            throw new DefaultRuntimeException("Exception:fail to parse CSV file:" + exception.getMessage());
         }
 
     }

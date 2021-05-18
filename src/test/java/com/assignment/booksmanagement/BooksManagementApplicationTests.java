@@ -3,8 +3,8 @@ package com.assignment.booksmanagement;
 import com.assignment.booksmanagement.Utils.TestData;
 import com.assignment.booksmanagement.model.Book;
 import org.json.JSONException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,17 +12,14 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@RunWith(SpringRunner.class)
 public class BooksManagementApplicationTests {
-
 
     @LocalServerPort int port;
     @Autowired TestRestTemplate restTemplate;
@@ -132,10 +129,10 @@ public class BooksManagementApplicationTests {
                     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(statements = ("INSERT INTO BOOKS_TAGS (ISBN, TAG) VALUES (555, 'TagBlunder555')"),
                     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    public void testDeleteBookWithISBN() throws JSONException {
+    public void testDeleteBookWithISBN() {
         String url = "http://localhost:" + port + "/books-management/v1/book/555";
         HttpEntity<Book> requestEntity = new HttpEntity<>(null, null);
-        ResponseEntity responseEntity = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, String.class);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals("{\"message\":\"deleted successfully\"}", responseEntity.getBody());
     }
@@ -166,50 +163,69 @@ public class BooksManagementApplicationTests {
     @Sql(statements = ("INSERT INTO BOOKS_TAGS (ISBN, TAG) VALUES (2222, 'TagBlunder2222')"),
                     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     public void testSearchBookWithAuthor() throws JSONException {
-     testSearchBooks("author", "Rahul1111");
+        ResponseEntity<String> responseEntity = testSearchBooks("author", "Rahul1111");
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        String expectedResult =
+                        "[{\"isbn\":1111,\"title\":\"Blunder1111\",\"author\":\"Rahul1111\",\"tags\":[{\"tag\":\"TagBlunder1111\"}],\"createdAt\":null,\"updatedAt\":null}]";
+        JSONAssert.assertEquals(expectedResult, responseEntity.getBody(), true);
     }
 
     @Test
-    @Sql(statements = ("INSERT INTO BOOKS (ISBN, Author, Title) VALUES (1111, 'Rahul1111', 'Blunder1111');"),
+    @Sql(statements = ("INSERT INTO BOOKS (ISBN, Author, Title) VALUES (3333, 'Rahul3333', 'Blunder3333');"),
                     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(statements = ("INSERT INTO BOOKS_TAGS (ISBN, TAG) VALUES (1111, 'TagBlunder1111')"),
+    @Sql(statements = ("INSERT INTO BOOKS_TAGS (ISBN, TAG) VALUES (3333, 'TagBlunder3333')"),
                     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(statements = ("INSERT INTO BOOKS (ISBN, Author, Title) VALUES (2222, 'Rahul2222', 'Blunder2222');"),
+    @Sql(statements = ("INSERT INTO BOOKS (ISBN, Author, Title) VALUES (4444, 'Rahul4444', 'Blunder4444');"),
                     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(statements = ("INSERT INTO BOOKS_TAGS (ISBN, TAG) VALUES (2222, 'TagBlunder2222')"),
+    @Sql(statements = ("INSERT INTO BOOKS_TAGS (ISBN, TAG) VALUES (4444, 'TagBlunder4444')"),
                     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     public void testSearchBookWithTitle() throws JSONException {
-        testSearchBooks("title", "Blunder1111");
+
+        ResponseEntity<String> responseEntity = testSearchBooks("title", "Blunder3333");
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        String expectedResult =
+                        "[{\"isbn\":3333,\"title\":\"Blunder3333\",\"author\":\"Rahul3333\",\"tags\":[{\"tag\":\"TagBlunder3333\"}],\"createdAt\":null,\"updatedAt\":null}]";
+        JSONAssert.assertEquals(expectedResult, responseEntity.getBody(), true);
 
     }
 
     @Test
-    @Sql(statements = ("INSERT INTO BOOKS (ISBN, Author, Title) VALUES (1111, 'Rahul1111', 'Blunder1111');"),
+    @Sql(statements = ("INSERT INTO BOOKS (ISBN, Author, Title) VALUES (5555, 'Rahul5555', 'Blunder5555');"),
                     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(statements = ("INSERT INTO BOOKS_TAGS (ISBN, TAG) VALUES (1111, 'TagBlunder1111')"),
+    @Sql(statements = ("INSERT INTO BOOKS_TAGS (ISBN, TAG) VALUES (5555, 'TagBlunder5555')"),
                     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(statements = ("INSERT INTO BOOKS (ISBN, Author, Title) VALUES (2222, 'Rahul2222', 'Blunder2222');"),
+    @Sql(statements = ("INSERT INTO BOOKS (ISBN, Author, Title) VALUES (6666, 'Rahul6666', 'Blunder6666');"),
                     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(statements = ("INSERT INTO BOOKS_TAGS (ISBN, TAG) VALUES (2222, 'TagBlunder2222')"),
+    @Sql(statements = ("INSERT INTO BOOKS_TAGS (ISBN, TAG) VALUES (6666, 'TagBlunder6666')"),
                     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     public void testSearchBookWithISBN() throws JSONException {
-        testSearchBooks("isbn","1111");
+
+        ResponseEntity<String> responseEntity = testSearchBooks("isbn", "5555");
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        String expectedResult =
+                        "[{\"isbn\":5555,\"title\":\"Blunder5555\",\"author\":\"Rahul5555\",\"tags\":[{\"tag\":\"TagBlunder5555\"}],\"createdAt\":null,\"updatedAt\":null}]";
+        JSONAssert.assertEquals(expectedResult, responseEntity.getBody(), true);
     }
 
     @Test
-    @Sql(statements = ("INSERT INTO BOOKS (ISBN, Author, Title) VALUES (1111, 'Rahul1111', 'Blunder1111');"),
+    @Sql(statements = ("INSERT INTO BOOKS (ISBN, Author, Title) VALUES (7777, 'Rahul7777', 'Blunder7777');"),
                     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(statements = ("INSERT INTO BOOKS_TAGS (ISBN, TAG) VALUES (1111, 'TagBlunder1111')"),
+    @Sql(statements = ("INSERT INTO BOOKS_TAGS (ISBN, TAG) VALUES (7777, 'TagBlunder7777')"),
                     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(statements = ("INSERT INTO BOOKS (ISBN, Author, Title) VALUES (2222, 'Rahul2222', 'Blunder2222');"),
+    @Sql(statements = ("INSERT INTO BOOKS (ISBN, Author, Title) VALUES (8888, 'Rahul8888', 'Blunder8888');"),
                     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(statements = ("INSERT INTO BOOKS_TAGS (ISBN, TAG) VALUES (2222, 'TagBlunder2222')"),
+    @Sql(statements = ("INSERT INTO BOOKS_TAGS (ISBN, TAG) VALUES (8888, 'TagBlunder8888')"),
                     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     public void testSearchBookWithTags() throws JSONException {
-        testSearchBooks("tag","TagBlunder1111");
+
+        ResponseEntity<String> responseEntity = testSearchBooks("tag", "TagBlunder7777");
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        String expectedResult =
+                        "[{\"isbn\":7777,\"title\":\"Blunder7777\",\"author\":\"Rahul7777\",\"tags\":[{\"tag\":\"TagBlunder7777\"}],\"createdAt\":null,\"updatedAt\":null}]";
+        JSONAssert.assertEquals(expectedResult, responseEntity.getBody(), true);
     }
 
-    public void testSearchBooks(String param, String value) throws JSONException {
+    public ResponseEntity<String> testSearchBooks(String param, String value)  {
         String url = "http://localhost:" + port + "/books-management/v1/search-books";
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
        /* to do test with pagination
@@ -218,11 +234,7 @@ public class BooksManagementApplicationTests {
         HttpEntity<Book> requestEntity = new HttpEntity<>(null, headers);
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
                         .queryParam(param, value);
-        ResponseEntity<String> responseEntity =
-                        restTemplate.exchange(builder.toUriString(), HttpMethod.GET, requestEntity, String.class);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        String expectedResult ="[{\"isbn\":1111,\"title\":\"Blunder1111\",\"author\":\"Rahul1111\",\"tags\":[{\"tag\":\"TagBlunder1111\"}],\"createdAt\":null,\"updatedAt\":null}]";
-        JSONAssert.assertEquals(expectedResult,responseEntity.getBody(), true);
+        return restTemplate.exchange(builder.toUriString(), HttpMethod.GET, requestEntity, String.class);
     }
 }
 

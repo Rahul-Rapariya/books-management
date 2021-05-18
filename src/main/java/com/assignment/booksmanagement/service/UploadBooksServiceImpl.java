@@ -22,9 +22,9 @@ public class UploadBooksServiceImpl implements UploadBooksService {
     @Override public int uploadBooks(MultipartFile file) {
         try {
             List<Book> books = CsvParserUtility.readFile(file.getInputStream());
-            bookRepository.saveAll(books);
+            List<Book> uploadedBooks = bookRepository.saveAll(books);
             logger.debug("{} books uploaded successfully", books.size());
-            return books.size();
+            return uploadedBooks.size();
         } catch (IOException ioException) {
             logger.error("IOException:Exception while uploading the file ", ioException);
             throw new DefaultRuntimeException("Something went wrong!");
